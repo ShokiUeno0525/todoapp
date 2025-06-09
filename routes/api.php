@@ -66,4 +66,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ここに ToDo CRUD API を追加していく
     // 例：Route::apiResource('todos', TodoController::class);
+Route::middleware('auth:sanctum')->apiResource('todos', TodoController::class);
+
 });
