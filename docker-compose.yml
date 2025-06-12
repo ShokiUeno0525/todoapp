@@ -1,17 +1,15 @@
-version: '3.8'
-
 services:
   app:
     # Laravel を動かす PHP (Apache) コンテナ
     build:
       context: .
-      dockerfile: Dockerfile           # Dockerfile の実際の名前に合わせてください（大文字 “D”）
+      dockerfile: Dockerfile # Dockerfile の実際の名前に合わせてください（大文字 “D”）
     container_name: laravel_app
     volumes:
-      - ./:/var/www/html           # ローカルの Laravel プロジェクトをマウント
-      - ./php.ini:/usr/local/etc/php/php.ini   # 「/user」→「/usr」に修正
+      - ./:/var/www/html # ローカルの Laravel プロジェクトをマウント
+      - ./php.ini:/usr/local/etc/php/php.ini # 「/user」→「/usr」に修正
     ports:
-      - "8000:80"                      # ホストの 8000 → コンテナの 80
+      - "8000:80" # ホストの 8000 → コンテナの 80
     depends_on:
       - db
     environment:
@@ -26,12 +24,12 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: demo
-      MYSQL_USER: demo_user           # 「MYSQL_UESR」→「MYSQL_USER」に修正
+      MYSQL_USER: demo_user # 「MYSQL_UESR」→「MYSQL_USER」に修正
       MYSQL_PASSWORD: demo_pass
       TZ: "Asia/Tokyo"
     volumes:
-      - dbdata:/var/lib/mysql         # 永続化用ボリューム
-      - ./my.cnf:/etc/mysql/conf.d/my.cnf   # 「.conf.d」→「conf.d」に修正
+      - dbdata:/var/lib/mysql # 永続化用ボリューム
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf # 「.conf.d」→「conf.d」に修正
     # Laravel からはホスト名 “db” でアクセス
 
   phpmyadmin:
@@ -41,11 +39,12 @@ services:
       - "4040:80"
     depends_on:
       - db
-    environment:                       # 「envioronment」→「environment」に修正
-      PMA_HOST: db                     # サービス名 “db” を指定
+    environment:
+      # 「envioronment」→「environment」に修正
+      PMA_HOST: db # サービス名 “db” を指定
       PMA_PORT: 3306
-      PMA_USER: root                   # または demo_user
-      PMA_PASSWORD: root               # root でログインする場合
+      PMA_USER: root # または demo_user
+      PMA_PASSWORD: root # root でログインする場合
       PMA_ARBITRARY: 1
     volumes:
       - ./phpmyadmin/sessions:/sessions
