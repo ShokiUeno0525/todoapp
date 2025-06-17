@@ -1,71 +1,65 @@
 <?php
 
+use App\Http\Controllers\TodoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Vlidaition\ValidationException;
-use App\models\User;
+use Illuminate\Support\Facades\Route;
+use App\Models\User;
 
-Route::middleware('guest')->group(function (){
-    //CSRF　Cookieを取得するエンドポイント
-    return response()->json(['csrf' => 'ok']);
-});
-
-//ユーザー登録
+//
+// ユーザー登録（認証なし）
+//
 Route::post('/register', function (Request $request) {
     $request->validate([
-        'name' => 'required|string|max:255' ,
-        'email' => 'required|string\email|max:255|unique:users' ,
-        'password' => 'required|string|min:8|confirmed' ,
-    ]),
-});
-
-    $users = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::male($request->password),
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:8|confirmed',
     ]);
 
-    return responce()->json(['massage' => 'Registered successfully'], 201);
- });
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+    ]);
 
- //ログイン
- Route::post('/login', function (Request $request) {
-    $request->validate([
-        'email' =>'required|email',
-        'password' => 'required',
-    ]),
- });
-
-    $user =User::where('email', $request->email)->first();
-
-    if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
-        }
-
-        // セッションにログイン状態をセット
-        auth()->login($user);
-
-        return response()->json(['message' => 'Logged in']);
-    });
+    return response()->json(['message' => 'Registered successfully'], 201);
 });
 
-// 認証済みユーザーのみアクセス可
+//
+// ログイン（認証なし）
+//
+Route::post('/login', function (Request $request) {
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        return response()->json(['message' => 'Invalid credentials'], 401);
+    }
+
+    $token = $user->createToken('api-token')->plainTextToken;
+
+    return response()->json(['token' => $token]);
+});
+
+//
+// 認証済みルート（sanctumミドルウェア付き）
+//
 Route::middleware('auth:sanctum')->group(function () {
-    // ログアウト
+    // ログアウト（アクセストークン削除）
     Route::post('/logout', function (Request $request) {
-        auth()->logout();
+        $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logged out']);
     });
 
-    // ユーザー情報取得（例）
+    // 認証済みユーザー情報取得
     Route::get('/user', function (Request $request) {
         return response()->json($request->user());
     });
 
-    // ここに ToDo CRUD API を追加していく
-    // 例：Route::apiResource('todos', TodoController::class);
-Route::middleware('auth:sanctum')->apiResource('todos', TodoController::class);
-
+    // ToDoリソース管理（認証必須）
+    Route::apiResource('todos', TodoController::class);
 });

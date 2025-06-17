@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -9,8 +10,11 @@ class TodoController extends Controller
     // タスクを一覧表示
     public function index()
     {
-        $todos = Todo::orderBy('id', 'asc')->get();
-        return view('todos.index', compact('todos'));
+        $todos = [
+            ['id' => 1, 'title' => '固定タスク1', 'description' => '説明1', 'due_date' => '2025-06-30'],
+            ['id' => 2, 'title' => '固定タスク2', 'description' => '説明2', 'due_date' => '2025-07-15'],
+        ];
+        return response()->json($todos);
     }
 
 
@@ -21,14 +25,14 @@ class TodoController extends Controller
 
     public function store(Request $request)
     {
-    $validated = $request->validate([
-        'title' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'due_date' => 'nullable|date',
-    ]);
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'due_date' => 'nullable|date',
+        ]);
 
-    Todo::create($validated);
+        Todo::create($validated);
 
-    return redirect()->route('todos.index')->with('success', 'タスクを作成しました');
+        return redirect()->route('todos.index')->with('success', 'タスクを作成しました');
     }
 }
