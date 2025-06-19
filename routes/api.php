@@ -57,7 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // 認証済みユーザー情報取得
     Route::get('/user', function (Request $request) {
-        return response()->json($request->user());
+        return $request->user();
     });
 
     // ToDoリソース管理（認証必須）
