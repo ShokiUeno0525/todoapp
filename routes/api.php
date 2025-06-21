@@ -7,6 +7,10 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use App\Models\User;
 use App\Http\Controllers\TodoController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\DashboardController;
+
 
 Route::get('ping', fn() => response('pong'));
 
@@ -95,10 +99,21 @@ Route::middleware('auth:sanctum')->group(function () {
         $request->user()->currentAccessToken()->delete();
         return response()->json(['message' => 'Logged out']);
     });
-    Route::get('user', function (Request $request) {
-        return $request->user();
-    });
+    
     Route::apiResource('todos', TodoController::class);
 
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    // プロフィール取得・更新
+    Route::get  ('/user',                   [ProfileController::class, 'show']);
+    Route::put  ('/user',                   [ProfileController::class, 'update']);
+
+    // 設定取得・更新
+    Route::get  ('/user/settings',          [SettingsController::class, 'show']);
+    Route::put  ('/user/settings',          [SettingsController::class, 'update']);
+
+    // ダッシュボードデータ
+    Route::get  ('/dashboard',              [DashboardController::class, 'data']);
 });
 
