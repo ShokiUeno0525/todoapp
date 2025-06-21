@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\ResetPasswordNotification;
+use App\Models\Todo;
+
 
 class User extends Authenticatable
 {
@@ -35,6 +38,14 @@ class User extends Authenticatable
     {
         $this->notify(new ResetPasswordNotification($token));
     }
+    /**
+     * このユーザーが持つ ToDo タスク
+     */
+    public function todos()
+    {
+        return $this->hasMany(Todo::class);
+    }
+
 
 }
 

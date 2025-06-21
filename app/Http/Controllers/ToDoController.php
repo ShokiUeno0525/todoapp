@@ -7,32 +7,97 @@ use App\Models\Todo;   // モデルの名前空間に合わせて修正
 
 class TodoController extends Controller
 {
-    // タスクを一覧表示
-    public function index()
+
+    /**
+     * タスク一覧取得
+     * クエリパラメータで絞り込み・ソートが可能
+     * GET /api/todos?status=done&sort_by=due_date&order=desc
+     */
+    public function index(Request $request)
     {
-        $todos = [
-            ['id' => 1, 'title' => '固定タスク1', 'description' => '説明1', 'due_date' => '2025-06-30'],
-            ['id' => 2, 'title' => '固定タスク2', 'description' => '説明2', 'due_date' => '2025-07-15'],
-        ];
+        $query = Todo::where('user_id', $request->user()->id);
+
+        //ステータス絞り込み
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        //ソートキー・順序
+        $sortBy = $request->get('sort_by', 'due_date');
+        $order  = $request->get('order', 'asc');
+        $allowedSorts = ['due_date', 'title', 'status', 'created_at'];
+        if(in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $order === 'desc' ? 'desc' : 'asc');
+        }
+
+        $todos = $query->get();
         return response()->json($todos);
     }
-
-
-    public function create()
-    {
-        return view('todos.create'); // resources/views/todos/create.blade.php を想定
-    }
-
+    
+    /**
+     * タスク新規作成
+     * POST /api/todos
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
-            'due_date' => 'nullable|date',
+            'due_date'    => 'nullable|date',
+            'status'      => 'required|in:pending,done',
         ]);
 
-        Todo::create($validated);
+         $todo = Todo::create(array_merge(
+        $validated,
+        ['user_id' => $request->user()->id]
+    ));
 
-        return redirect()->route('todos.index')->with('success', 'タスクを作成しました');
+        //作成したリソースを返す(ステータスコード201)
+        return response()->json($todo, 201);
+    } 
+
+    /**
+     * タスク詳細取得
+     * GET /api/todos/{id}
+     */
+    public function show(string $id)
+    {
+        $todo = Todo::findOrFail($id);
+        return response()->json($todo);
+    }
+
+     /**
+     * タスク更新
+     * PUT/PATCH /api/todos/{id}
+     */
+    public function update(Request $request, string $id)
+    {
+        $todo = Todo::findOrFail($id);
+
+        $validated = $request->validate([
+            'title'       =>'sometimes|required|string|max:255',
+            'description' => 'nullable|string',
+            'due_date'    => 'nullable|date',
+            'status'      => 'sometimes|in:pending,done',
+        ]);
+
+        $todo->fill($validated);
+        $todo->save();
+
+        return response()->json($todo);
+    }
+
+    /**
+     * タスク削除
+     * DELETE /api/todos/{id}
+     */
+    public function destroy(string $id)
+    {
+        $todo = Todo::findOrFail($id);
+        $todo->delete();
+
+        //204 No Content を返してフロントにはボディレスにする
+        return response()->noContent();
     }
 }
+
