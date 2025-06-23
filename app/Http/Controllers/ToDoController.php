@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Todo;   // モデルの名前空間に合わせて修正
+use ListRequest;
+use ToDoService;
 
 class TodoController extends Controller
 {
@@ -13,27 +15,16 @@ class TodoController extends Controller
      * クエリパラメータで絞り込み・ソートが可能
      * GET /api/todos?status=done&sort_by=due_date&order=desc
      */
-    public function index(Request $request)
+    public function index(ListRequest $request)
     {
-        $query = Todo::where('user_id', $request->user()->id);
-
-        //ステータス絞り込み
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        //ソートキー・順序
-        $sortBy = $request->get('sort_by', 'due_date');
-        $order  = $request->get('order', 'asc');
-        $allowedSorts = ['due_date', 'title', 'status', 'created_at'];
-        if(in_array($sortBy, $allowedSorts)) {
-            $query->orderBy($sortBy, $order === 'desc' ? 'desc' : 'asc');
-        }
-
-        $todos = $query->get();
+        $service = new ToDoService();
+        $todos = $service->getAllToDos($request);
         return response()->json($todos);
     }
     
+
+    //TODO: 明日から
+
     /**
      * タスク新規作成
      * POST /api/todos
