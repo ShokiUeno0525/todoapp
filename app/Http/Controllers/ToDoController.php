@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Todo;   // モデルの名前空間に合わせて修正
 use ListRequest;
+use StoreTodoRequest;
 use ToDoService;
 
 class TodoController extends Controller
@@ -29,22 +30,12 @@ class TodoController extends Controller
      * タスク新規作成
      * POST /api/todos
      */
-    public function store(Request $request)
+    public function store(StoreTodoRequest $request)
     {
-        $validated = $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'due_date'    => 'nullable|date',
-            'status'      => 'required|in:pending,done',
-        ]);
-
-         $todo = Todo::create(array_merge(
-        $validated,
-        ['user_id' => $request->user()->id]
-    ));
-
+        $service = new StoreTodoRequest();
+        $todos = $service->getValidatedData($request);
         //作成したリソースを返す(ステータスコード201)
-        return response()->json($todo, 201);
+        return response()->json($todos, 201);
     } 
 
     /**
