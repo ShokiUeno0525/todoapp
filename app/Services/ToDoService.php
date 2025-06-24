@@ -20,4 +20,9 @@ class ToDoService
 
         return $todos;
     }
+
+    public function createTodo(array $data) {
+        $todo = Todo::create($data);
+        return $todo;
+    }
 }

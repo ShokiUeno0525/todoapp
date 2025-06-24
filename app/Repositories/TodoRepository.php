@@ -27,4 +27,9 @@ class TodoRepository
     
         return $todos;
     }
+
+    public function create(array $data): Todo
+    {
+        return Todo::create($data);
+    }
 }
