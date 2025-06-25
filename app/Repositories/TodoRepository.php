@@ -32,4 +32,24 @@ class TodoRepository
     {
         return Todo::create($data);
     }
+
+    public function findById(string $id): Todo
+    {
+        return Todo::findOrFail($id);
+    }
+
+    public function update(string $id, array $data): Todo
+    {
+        $todo = $this->findById($id);
+        $todo->fill($data);
+        $todo->save();
+        return $todo;
+    }
+
+    public function delete(string $id): Todo
+    {
+        $todo = $this->findById($id);
+        $todo->delete();
+        return $todo;
+    }
 }

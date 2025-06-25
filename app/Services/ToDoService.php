@@ -25,4 +25,23 @@ class ToDoService
         $todo = Todo::create($data);
         return $todo;
     }
+
+    public function getTodoDetail(string $id) {
+        $todo = Todo::findOrFail($id);
+        return $todo;
+    }
+
+    public function updateTodo(string $id, array $data)
+     {
+        $todo = Todo::findOrFail($id);
+        $todo->update($data);
+        return $todo;
+    }
+
+    public function deleteTodo(string $id)
+    {
+        $todo = Todo::findOrFail($id);
+        $todo->delete();
+        return $todo;
+    }
 }
