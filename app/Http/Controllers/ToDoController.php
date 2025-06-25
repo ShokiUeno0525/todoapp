@@ -7,6 +7,8 @@ use App\Models\Todo;   // モデルの名前空間に合わせて修正
 use ListRequest;
 use StoreTodoRequest;
 use ToDoService;
+use UpdateRequest;
+
 
 class TodoController extends Controller
 {
@@ -22,9 +24,6 @@ class TodoController extends Controller
         $todos = $service->getAllToDos($request);
         return response()->json($todos);
     }
-    
-
-    //TODO: 明日から
 
     /**
      * タスク新規作成
@@ -44,7 +43,8 @@ class TodoController extends Controller
      */
     public function show(string $id)
     {
-        $todo = Todo::findOrFail($id);
+        $service = new ToDoService();
+        $todo = $service->getTodoDetail($id);
         return response()->json($todo);
     }
 
@@ -52,19 +52,12 @@ class TodoController extends Controller
      * タスク更新
      * PUT/PATCH /api/todos/{id}
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateRequest $request, string $id)
     {
-        $todo = Todo::findOrFail($id);
+        $service = new ToDoService();
+        $validated = $request->validated();
+        $todo = $service->updateTodo($id, $validated); 
 
-        $validated = $request->validate([
-            'title'       =>'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-            'due_date'    => 'nullable|date',
-            'status'      => 'sometimes|in:pending,done',
-        ]);
-
-        $todo->fill($validated);
-        $todo->save();
 
         return response()->json($todo);
     }
@@ -75,10 +68,9 @@ class TodoController extends Controller
      */
     public function destroy(string $id)
     {
-        $todo = Todo::findOrFail($id);
-        $todo->delete();
+        $service = new ToDoService();
+        $service->deleteTodo($id);
 
-        //204 No Content を返してフロントにはボディレスにする
         return response()->noContent();
     }
 }
