@@ -10,49 +10,19 @@ use App\Http\Controllers\TodoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\LoginController;
+
 
 
 Route::get('ping', fn() => response('pong'));
 
 // 認証不要
-Route::post('register', function (Request $request) {
+Route::post('register',[RegisterController::class,'register']);
 
-    $request->validate([
-        'name'                  => 'required|string|max:255',
-        'email'                 => 'required|email|unique:users',
-        'password'              => 'required|string|min:8|confirmed',
-    ]);
 
-    // ★ ここで必ず INSERT
-    $user = User::create([
-        'name'     => $request->name,
-        'email'    => $request->email,
-        'password' => Hash::make($request->password),   // ← Hash 化
-    ]);
+Route::post('login', [LoginController::class, 'login']);
 
-    return response()->json(['message'=>'Registered successfully'], 201);
-});
-
-Route::post('login', function (Request $request) {
-    $request->validate([
-        'email'    => 'required|email',
-        'password' => 'required|string',
-    ]);
-
-        // ユーザー取得
-    $user = User::where('email', $request->email)->first();
-
-    // 認証チェック
-    if (! $user || ! Hash::check($request->password, $user->password)) {
-        return response()->json(['message' => 'Invalid credentials'], 401);
-    }
-
-    // トークン発行
-    $token = $user->createToken('api-token')->plainTextToken;
-
-    // トークンを返却
-    return response()->json(['token' => $token], 200);
-});
 
 /** パスワードリセット用リンク送信 */
 Route::post('forgot-password', function(Request $request) {
