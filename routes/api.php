@@ -12,6 +12,9 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ForgotPasswordController;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\LogoutController;
 
 
 
@@ -25,54 +28,22 @@ Route::post('login', [LoginController::class, 'login']);
 
 
 /** パスワードリセット用リンク送信 */
-Route::post('forgot-password', function(Request $request) {
-    $request->validate([
-        'email' => 'required|email|exists:users,email',
-    ]);
+Route::post('forgot-password', [ForgotPasswordController::class, 'sendLink']);  
 
-    $status = Password::sendResetLink(
-        $request->only('email')
-    );
-
-    return $status === Password::RESET_LINK_SENT
-        ? response()->json(['message'=>__($status)], 200)
-        : response()->json(['message'=>__($status)], 400);
-});
 
 /** リセット実行 */
-Route::post('reset-password', function(Request $request) {
-    $request->validate([
-        'token'                 => 'required|string',
-        'email'                 => 'required|email|exists:users,email',
-        'password'              => 'required|string|min:8|confirmed',
-    ]);
+Route::post('reset-password', [PasswordResetController::class, 'reset']);
+// パスワードリセットのためのルート
 
-    $status = Password::reset(
-        $request->only('email','password','password_confirmation','token'),
-        function(User $user, string $password) {
-            $user->forceFill([
-                'password'       => Hash::make($password),
-                'remember_token' => Str::random(60),
-            ])->save();
-        }
-    );
-
-    return $status === Password::PASSWORD_RESET
-        ? response()->json(['message'=>__($status)], 200)
-        : response()->json(['message'=>__($status)], 400);
-});
-
-//
-// 認証済みルート（sanctumミドルウェア付き）
+/** 認証済みルート（sanctumミドルウェア付き） */
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('logout', function (Request $request) {
-        $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out']);
-    });
-    
-    Route::apiResource('todos', TodoController::class);
 
+    Route::post('logout',[LogoutController::class, 'logout']);
+
+    Route::apiResource('todos', TodoController::class);
 });
+
+//ここから
 
 Route::middleware('auth:sanctum')->group(function () {
     // プロフィール取得・更新
