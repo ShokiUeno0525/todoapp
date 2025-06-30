@@ -2,6 +2,9 @@
 namespace App\Services;
 
 use App\Repositories\PasswordResetRepository;
+use App\Http\Requests\PasswordResetRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Password;
 
 class PasswordResetService
 {
@@ -10,8 +13,13 @@ class PasswordResetService
         // Constructor can be used to inject dependencies if needed
     }
 
-    public function resetPassword(array $data): string
+    public function sendResetLink(string $email,): string
     {
-        return $this->passwordResetRepository->reset($data);
+       return $this->passwordResetRepository->sendResetLink(['email' => $email]);
+    }
+
+    public function resetPassword(array $data)
+    {
+        return $this->passwordResetRepository->resetPassword($data);
     }
 }
