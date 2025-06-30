@@ -1,17 +1,24 @@
 <?php
 
 namespace App\Http\Controllers;
+   // モデルの名前空間に合わせて修正
+//ここから
 
-use Illuminate\Http\Request;
-use App\Models\Todo;   // モデルの名前空間に合わせて修正
-use ListRequest;
-use StoreTodoRequest;
-use ToDoService;
-use UpdateRequest;
+   use Illuminate\Http\Request;
+   use Illuminate\Http\JsonResponse;
+   use App\Http\Controllers\Controller;
+   use App\Http\Requests\Todos\ListRequest;
+   use App\Http\Requests\Todos\StoreTodoRequest;
+   use App\Http\Requests\Todos\UpdateRequest;
+   use App\Services\TodoService;
 
-
-class TodoController extends Controller
+   class TodoController extends Controller
 {
+    public function __construct(private ToDoService $todoService)
+    {
+        // ミドルウェアの設定などが必要な場合はここに記述
+        // 例: $this->middleware('auth');
+    }
 
     /**
      * タスク一覧取得
@@ -20,8 +27,8 @@ class TodoController extends Controller
      */
     public function index(ListRequest $request)
     {
-        $service = new ToDoService();
-        $todos = $service->getAllToDos($request);
+        $todos = $this->todoService->getAllToDos($request->validate());
+
         return response()->json($todos);
     }
 
@@ -31,11 +38,10 @@ class TodoController extends Controller
      */
     public function store(StoreTodoRequest $request)
     {
-        $service = new StoreTodoRequest();
-        $todos = $service->getValidatedData($request);
+        $todos = $this->todoService->createTodo($request->validated());
         //作成したリソースを返す(ステータスコード201)
         return response()->json($todos, 201);
-    } 
+    }
 
     /**
      * タスク詳細取得
@@ -43,8 +49,7 @@ class TodoController extends Controller
      */
     public function show(string $id)
     {
-        $service = new ToDoService();
-        $todo = $service->getTodoDetail($id);
+        $todo = $this->todoService->getTodoDetail($id);
         return response()->json($todo);
     }
 
@@ -54,11 +59,7 @@ class TodoController extends Controller
      */
     public function update(UpdateRequest $request, string $id)
     {
-        $service = new ToDoService();
-        $validated = $request->validated();
-        $todo = $service->updateTodo($id, $validated); 
-
-
+        $todo = $this->todoService->updateTodo($id, $request->validated());
         return response()->json($todo);
     }
 
@@ -68,9 +69,7 @@ class TodoController extends Controller
      */
     public function destroy(string $id)
     {
-        $service = new ToDoService();
-        $service->deleteTodo($id);
-
+        $this->todoService->deleteTodo($id);
         return response()->noContent();
     }
 }

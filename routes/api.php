@@ -1,11 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
-use App\Models\User;
 use App\Http\Controllers\TodoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
@@ -38,12 +33,11 @@ Route::post('reset-password', [PasswordResetController::class, 'reset']);
 /** 認証済みルート（sanctumミドルウェア付き） */
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::post('logout',[LogoutController::class, 'logout']);
-
+    Route::post('logout', [LogoutController::class, 'logout']);
     Route::apiResource('todos', TodoController::class);
 });
 
-//ここから
+
 
 Route::middleware('auth:sanctum')->group(function () {
     // プロフィール取得・更新

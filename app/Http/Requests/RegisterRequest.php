@@ -12,5 +12,22 @@ class RegisterRequest extends FormRequest
             'password' => 'required|string|min:8|confirmed',
         ];
     }
-}
 
+
+    public function messages(): array
+   {
+        return [
+            'email.required' => 'メールアドレスは必須です。',
+            'email.email' => 'メールアドレスの形式が正しくありません。',
+            'email.unique' => 'このメールアドレスはすでに登録されています。',
+            'password.required' => 'パスワードは必須です。',
+            'password.min' => 'パスワードは8文字以上である必要があります。',
+            'password.confirmed' => 'パスワードの確認が一致しません。',
+        ];
+    }
+
+    public function authorize(): bool
+    {
+    return true; // 認証は不要なので常にtrueを返す
+    }
+}
