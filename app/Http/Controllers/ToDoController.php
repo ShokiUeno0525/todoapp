@@ -17,7 +17,7 @@ namespace App\Http\Controllers;
     public function __construct(private ToDoService $todoService)
     {
         // ミドルウェアの設定などが必要な場合はここに記述
-        // 例: $this->middleware('auth');
+        // 例: $this->middleware('auth')
     }
 
     /**
@@ -25,9 +25,9 @@ namespace App\Http\Controllers;
      * クエリパラメータで絞り込み・ソートが可能
      * GET /api/todos?status=done&sort_by=due_date&order=desc
      */
-    public function index(ListRequest $request)
+    public function index(Request $request): JsonResponse
     {
-        $todos = $this->todoService->getAllToDos($request->validate());
+        $todos = $this->todoService->getAllTodos($request);
 
         return response()->json($todos);
     }
@@ -36,12 +36,13 @@ namespace App\Http\Controllers;
      * タスク新規作成
      * POST /api/todos
      */
-    public function store(StoreTodoRequest $request)
-    {
-        $todos = $this->todoService->createTodo($request->validated());
-        //作成したリソースを返す(ステータスコード201)
-        return response()->json($todos, 201);
-    }
+
+     public function store(StoreTodoRequest $request): JsonResponse
+     {
+        $todo = $this->todoService->createTodo($request->validated(), $request);
+         // 作成したリソースを返す(ステータスコード201)
+         return response()->json($todo, 201);
+     }
 
     /**
      * タスク詳細取得

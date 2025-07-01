@@ -1,5 +1,7 @@
 <?php 
 
+namespace App\Http\Requests\Todos;
+
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRequest extends FormRequest
