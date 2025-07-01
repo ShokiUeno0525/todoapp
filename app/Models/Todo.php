@@ -10,7 +10,7 @@ class Todo extends Model
     use HasFactory;
 
     // 必要に応じて fillable や関係を定義
-    protected $fillable = ['title', 'description', 'due_date', 'status'];
+    protected $fillable = ['title', 'description', 'due_date', 'status','user_id'];
 
     public function user()
     {

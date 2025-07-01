@@ -1,6 +1,8 @@
 <?php
+namespace App\Repositories;
 
 use App\Models\Todo;
+use Illuminate\Database\Eloquent\Collection;
 
 class TodoRepository
 {
@@ -13,7 +15,7 @@ class TodoRepository
         string $order
     )
     {
-        $allowedSorts = ['due_date', 'title', 'status', 'created_at'];
+        $allowedSorts = ['due_date', 'title', 'status', 'created_at','user_id'];
     
         $todos = Todo::query()
             ->where('user_id', $userId)
@@ -30,7 +32,10 @@ class TodoRepository
 
     public function create(array $data): Todo
     {
-        return Todo::create($data);
+        $todo = new Todo();
+        $todo->fill($data);
+        $todo->save();
+        return $todo;
     }
 
     public function findById(string $id): Todo
